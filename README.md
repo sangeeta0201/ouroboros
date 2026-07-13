@@ -21,6 +21,28 @@ works.
              per-turn transcripts in runs/<timestamp>/
 ```
 
+## Why ouroboros? (loop engineering)
+
+This is an instance of **[loop engineering](https://addyosmani.com/blog/loop-engineering/)** —
+the 2026 shift from hand-prompting an agent to *designing the loop that prompts the
+agent*. As Boris Cherny, who leads Anthropic's Claude Code team, put it: *"I don't
+prompt Claude anymore. I have loops running that prompt Claude and figuring out what
+to do. My job is to write loops."* A hallmark of the pattern is **separating the model
+that does the work from the one that judges/guides it**, so the writer is never its
+own judge — exactly the worker/guide split here.
+
+It also solves a real friction with today's frontier models: **they increasingly
+interview you instead of just doing the work.** Anthropic's own
+[interview technique](https://ai-checker.webcoda.com.au/articles/interview-technique-ai-requirements-gathering-2026)
+has the model use `AskUserQuestion` to grill you for dozens of clarifications before
+writing code, and research formalizes when agents *should* ask versus assume
+([Ask or Assume?](https://arxiv.org/html/2603.26233v1),
+[Curiosity by Design](https://arxiv.org/html/2507.21285v1)). That's excellent when a
+human is at the keyboard — but it **stalls unattended, long-running work**: the agent
+blocks on a question no one is there to answer. Ouroboros closes the gap by putting a
+second model in the human's seat. The guide answers the worker's questions and rules
+on forks, so the loop keeps turning overnight without you.
+
 ## How it works
 
 Every worker turn ends with exactly one **control line**:
