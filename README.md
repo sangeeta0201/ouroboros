@@ -1,7 +1,9 @@
-# loop-orchestrator
+# ouroboros
 
-A two-model autonomous loop for long-running engineering tasks, built on the
-[`claude`](https://docs.claude.com/en/docs/claude-code) CLI.
+*The snake that eats its own tail* — a self-sustaining, two-model autonomous loop
+for long-running engineering tasks, built on the
+[`claude`](https://docs.claude.com/en/docs/claude-code) CLI. The loop feeds itself:
+one model does the work, another guides it, and no human sits in the middle.
 
 Instead of a human sitting in the loop answering an agent's questions, a **worker**
 model does the engineering while a second **guide** model plays the role of the
