@@ -1,0 +1,27 @@
+OBJECTIVE
+<One or two sentences: what to accomplish and how success is measured. State that a
+negative/null result is a valid, reportable outcome so the worker doesn't force a bad change.>
+
+BACKGROUND / WHAT IS ALREADY KNOWN (do NOT redo)
+- <Point the worker at the exact files/functions/line ranges.>
+- <List facts already established so the worker doesn't waste turns rediscovering them.>
+- <List baselines / reference numbers to beat or match.>
+
+STEPS
+STEP 1 — <first concrete step>. End the turn with <<CONTINUE>>.
+STEP 2 — <next step, one at a time>.
+...
+
+GATE (mandatory before any success claim)
+- <Correctness gate: e.g. run >= 3 times, require coherent output matching a reference.>
+- <Perf gate: which number to read, what counts as WIN / FLAT / REGRESSION.>
+
+CONSTRAINTS
+- Obey the --constraints file.
+- Keep turns SHORT: at most ONE long op (one build / one sweep / one profile) per turn,
+  then <<CONTINUE>> so progress checkpoints against the per-turn timeout.
+
+DELIVERABLE
+Write the report to <workdir>/FINDINGS.md (the worker cannot write outside the workdir /
+into protected config dirs). Include: what changed and why, evidence, the gate results, and
+the final verdict. Then emit <<TASK_COMPLETE>>.

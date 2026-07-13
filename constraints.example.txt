@@ -1,0 +1,9 @@
+# Things the WORKER must never do (enforced by the guide + injected into the worker system prompt).
+# Edit to taste, then pass with --constraints constraints.example.txt
+
+- Never run destructive git commands (push --force, reset --hard, branch -D) without an explicit ruling.
+- Never delete files outside the working directory.
+- Never disable or skip pre-commit hooks (no --no-verify).
+- Never introduce new third-party dependencies without a guide ruling.
+- Do not change the benchmark command or omit --max-seq-length 512.
+- Make one small change at a time, verify, then proceed.

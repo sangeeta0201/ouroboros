@@ -1,0 +1,15 @@
+# Per-run worker/guide transcripts (may contain proprietary source / internal paths)
+runs/
+scratch/
+__pycache__/
+*.pyc
+
+# Console logs from live runs
+*.console.log
+
+# Project-specific task & constraints files (contain internal paths / kernel details).
+# Ship only the *.example.txt templates.
+task_*.txt
+constraints_*.txt
+!constraints.example.txt
+!task.example.txt
