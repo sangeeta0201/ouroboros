@@ -104,6 +104,68 @@ tail -f orchestrator.console.log
 | `--resume-session <id>` | Continue an existing worker session instead of starting fresh. |
 | `--yolo` | Pass `--dangerously-skip-permissions` to the worker (full autonomy — riskier). |
 
+## `/ouro` — the same loop, inside Claude Code
+
+`orchestrator.py` exists because `claude -p` is one-shot: something external has to keep
+resuming it. A Claude Code **subagent already runs its own multi-turn loop**, so inside
+Claude Code the `<<CONTINUE>>` half of the protocol is unnecessary machinery. What's still
+worth having is the *guide* — a second model absorbing the questions — and a strict rule
+about when the loop is allowed to interrupt you.
+
+That's `/ouro`. It is
+[`superpowers:executing-plans`](https://github.com/obra/superpowers) with a guide model in
+the human's seat:
+
+```
+/ouro plans/2026-08-13-retry.md     # execute that plan
+/ouro                                # newest plan in docs/specs, plans/, specs/ …
+```
+
+A written plan is **required** — with nothing to ground rulings in, the guide would have to
+invent answers, which is the failure this loop exists to prevent. The worker runs in a git
+worktree on its own branch, consults the guide at decision forks and at mandatory review
+checkpoints, and returns to your session only under five triggers: the guide punts, the
+answer isn't in the plan or docs, it's looping, the action is irreversible or
+outward-facing, or it's blocked on access. Done is not an interruption — it commits to the
+branch and reports once. It never merges or pushes.
+
+### How the guide differs here
+
+`orchestrator.py`'s guide is deliberately tool-less and answers from reasoning alone. The
+`/ouro` guide is **read-only over the repository** (`--tools "Read,Grep,Glob"`,
+`--permission-mode plan`) so it can ground rulings in the plan, `CLAUDE.md`, the docs, and
+the code — and refuse when the answer isn't there. It also reviews the worker's work at
+checkpoints, so the writer is never its own judge.
+
+Every review returns a **confidence score** describing how much of the worker's report the
+repository actually corroborated, split into what the guide verified by reading and what it
+could not check. The guide cannot execute anything, so claims like "the tests passed" always
+land in `UNVERIFIED` — the score tells you whether re-running the work yourself is worth it.
+
+### Install
+
+```bash
+./install.sh          # symlink into ~/.claude (repo stays source of truth)
+./install.sh --copy   # detached copies instead
+```
+
+Then **restart Claude Code** — slash commands hot-reload, agents do not.
+
+### Headless
+
+The worker also runs standalone, which is the closest analogue to the `orchestrator.py`
+flow:
+
+```bash
+OURO_ALLOW_WORKFLOW=1 claude -p --agent ouro-worker \
+  --permission-mode bypassPermissions "Execute the plan at plans/foo.md …"
+```
+
+`OURO_ALLOW_WORKFLOW=1` is the one place multi-agent orchestration is permitted — the
+`Workflow` tool is gated on human opt-in, and a headless worker has nobody to ask, so the
+consent has to come from the launch command. Under `/ouro` the worker is a subagent and the
+tool doesn't exist for it at all.
+
 ## Viewing the trace
 
 Each run is logged under `runs/<timestamp>/`:
@@ -143,8 +205,13 @@ You can also just `tail -f` the console log or any `runs/<ts>/iterNN_worker.stre
 
 | File | Purpose |
 |------|---------|
-| `orchestrator.py` | The loop (worker + guide driver). |
+| `orchestrator.py` | The standalone loop (worker + guide driver). |
 | `view.py` | Live REPL-style trace viewer. |
 | `watch.sh` | Plain-text status dashboard. |
 | `task.example.txt` | Task-file template. |
 | `constraints.example.txt` | Constraints-file template. |
+| `install.sh` | Symlink the `/ouro` files into `~/.claude`. |
+| `.claude/commands/ouro.md` | The `/ouro` slash command. |
+| `.claude/agents/ouro-worker.md` | The autonomous worker agent + escalation contract. |
+| `.claude/ouro/guide.sh` | Guide driver — read-only session, verdict in the exit code. |
+| `.claude/ouro/guide-protocol.md` | The guide's system prompt and confidence scoring. |
